@@ -1,16 +1,30 @@
-﻿using System.Threading.Tasks.Dataflow;
+﻿
+namespace Workflow;
 
-namespace Workflow
+using System.Threading.Tasks.Dataflow;
+using System.Text;
+using Domain;
+public class Workflow
 {
-	public class Workflow
+	private BufferBlock<Album> _startBlock;
+	private ActionBlock<AlbumCommercial> _saveCommercialsBlock;
+
+	public (BufferBlock<Album> startBlock, ActionBlock<AlbumCommercial> endBlock) CreateBlocks(CancellationToken cancellationToken, Action<string> consoleWriter)
 	{
-		public async Task StartWorkflow(CancellationToken cancellationToken)
-		{
-			var startBlock = new BufferBlock<int>();
-			var transformBlock1 = new TransformBlock<int, int>(n => n + 1);
-			var transformBlock2 = new TransformBlock<int, int>(n => n * 2);
-			var transformBlock3 = new TransformBlock<int, int>(n => n - 3);
-			var finalBlock = new ActionBlock<>()
-		}
+		_startBlock = StartBlock.Create(cancellationToken);
+		var addAlbumInfo = AddAlbumInfoBlock.Create(cancellationToken);
+		var addArtistInfo = AddArtistInfoBlock.Create(cancellationToken); 
+		var addSocialMediaBlock = AddSocialMediaBlock.Create(cancellationToken);
+		// var bufferResultsBlock = BatchOutputBlock.Create(cancellationToken, batchSize:10);
+		_saveCommercialsBlock = SaveCommercialsBlock.Create(cancellationToken,consoleWriter);
+
+		var linkOptions = new DataflowLinkOptions { PropagateCompletion = true, };
+		_startBlock.LinkTo(addAlbumInfo, linkOptions);
+		addAlbumInfo.LinkTo(addArtistInfo, linkOptions);
+		addArtistInfo.LinkTo(addSocialMediaBlock, linkOptions);
+		addSocialMediaBlock.LinkTo(_saveCommercialsBlock, linkOptions);
+		//bufferResultsBlock.LinkTo(_saveCommercialsBlock, linkOptions);
+
+		return (_startBlock, _saveCommercialsBlock);
 	}
 }
