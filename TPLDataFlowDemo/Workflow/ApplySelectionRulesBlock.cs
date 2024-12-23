@@ -41,7 +41,7 @@ public static class ApplySelectionRulesBlock
 		*/
 		var passedChecks = true;
 
-		if (organization.Founded > 1985)
+		if (organization.Founded <= 1985)
 			passedChecks = false;
 		else if (organization.Country.Equals("United States of America", StringComparison.InvariantCultureIgnoreCase))
 			passedChecks = false;
