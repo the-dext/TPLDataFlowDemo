@@ -5,7 +5,7 @@ using Domain;
 
 public static class StartBlock
 {
-    public static BufferBlock<Album> Create(CancellationToken cancellationToken) =>
+    public static BufferBlock<Organization> Create(CancellationToken cancellationToken) =>
         new(new DataflowBlockOptions()
         {
             CancellationToken = cancellationToken,

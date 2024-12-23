@@ -1,4 +1,6 @@
 ﻿
+using OneOf.Types;
+using OneOf;
 namespace Workflow;
 
 using System.Threading.Tasks.Dataflow;
@@ -6,25 +8,23 @@ using System.Text;
 using Domain;
 public class Workflow
 {
-	private BufferBlock<Album> _startBlock;
-	private ActionBlock<AlbumCommercial> _saveCommercialsBlock;
+	private BufferBlock<Organization> _startBlock;
+	private ActionBlock<OneOf<Organization, None>> _outputSelectionBlock;
 
-	public (BufferBlock<Album> startBlock, ActionBlock<AlbumCommercial> endBlock) CreateBlocks(CancellationToken cancellationToken, Action<string> consoleWriter)
+	public (BufferBlock<Organization> startBlock, ActionBlock<OneOf<Organization, None>> endBlock) CreateBlocks(CancellationToken cancellationToken, Action<string> consoleWriter)
 	{
 		_startBlock = StartBlock.Create(cancellationToken);
-		var addAlbumInfo = AddAlbumInfoBlock.Create(cancellationToken);
-		var addArtistInfo = AddArtistInfoBlock.Create(cancellationToken); 
-		var addSocialMediaBlock = AddSocialMediaBlock.Create(cancellationToken);
+		var filterByCountry = FilterByIndustryBlock.Create(cancellationToken);
+		var applySelectionRulesBlock = ApplySelectionRulesBlock.Create(cancellationToken); 
 		// var bufferResultsBlock = BatchOutputBlock.Create(cancellationToken, batchSize:10);
-		_saveCommercialsBlock = SaveCommercialsBlock.Create(cancellationToken,consoleWriter);
+		_outputSelectionBlock = OutputSelectionBlock.Create(cancellationToken,consoleWriter);
 
 		var linkOptions = new DataflowLinkOptions { PropagateCompletion = true, };
-		_startBlock.LinkTo(addAlbumInfo, linkOptions);
-		addAlbumInfo.LinkTo(addArtistInfo, linkOptions);
-		addArtistInfo.LinkTo(addSocialMediaBlock, linkOptions);
-		addSocialMediaBlock.LinkTo(_saveCommercialsBlock, linkOptions);
-		//bufferResultsBlock.LinkTo(_saveCommercialsBlock, linkOptions);
+		_startBlock.LinkTo(filterByCountry, linkOptions);
+		filterByCountry.LinkTo(applySelectionRulesBlock, linkOptions);
+		applySelectionRulesBlock.LinkTo(_outputSelectionBlock, linkOptions);
+		//bufferResultsBlock.LinkTo(_outputSelectionBlock, linkOptions);
 
-		return (_startBlock, _saveCommercialsBlock);
+		return (_startBlock, _outputSelectionBlock);
 	}
 }
