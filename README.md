@@ -12,15 +12,12 @@ Once downloaded rename the file to organisations.csv and replace the one in the 
 ## What does the project do?
 Each organisation is read in from the csv file line by line and put into the workflow input buffer where it waits to be procesed.
 
-The first stage of the pipeline filters out companies that are not in a list of
-"Cosmetics", "plastics", "Research Industry"
+The first stage of the pipeline filters out companies that are not in a list of `"Cosmetics", "plastics", "Research Industry"`
 
 Organisations that pass this stage will then be checked for a number of rules within the second stage.
 The rules are
-	Founded after 1985,
-	Not within the United States of America
-	Greater than 5,000 Employees
+	`Founded after 1985,`
+	`Not within the United States of America`
+	`Greater than 5,000 Employees`
 
-The final stage will output the selected organisations.
-
-No database is used in this demo, output will be to screen.
+The final stage will output the selected organisations and they will be will be printed to the console.
