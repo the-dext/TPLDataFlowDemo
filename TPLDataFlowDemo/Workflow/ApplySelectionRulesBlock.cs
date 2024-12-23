@@ -7,14 +7,25 @@ using Domain;
 
 public static class ApplySelectionRulesBlock
 {
-	public static TransformBlock<OneOf<Organization, None>, OneOf<Organization,None>> Create(CancellationToken cancellationToken) 
-		=> new((organization) =>
-		{
-			return organization.Match(
-				ApplySelectionRules,
-				none => organization
-			);
-		});
+	/// <summary>
+	/// A Demonstration of how a single block might apply a number of rules to decide if the incoming data is valid to be passed on to the next block.
+	///  Performs an action on the organization if it passed workflow checks.
+	///  The callback passed into this method is purely for demo purposes.
+	/// </summary>
+	/// <param name="cancellationToken"></param>
+	/// <returns></returns>
+	public static TransformBlock<OneOf<Organization, None>, OneOf<Organization, None>> Create(CancellationToken cancellationToken)
+		=> new(organization =>
+			{
+				return organization.Match(
+					ApplySelectionRules,
+					none => organization
+				);
+			},
+			new ExecutionDataflowBlockOptions()
+			{
+				CancellationToken = cancellationToken
+			});
 
 	private static OneOf<Organization, None> ApplySelectionRules(Organization organization)
 	{
